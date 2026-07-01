@@ -15,3 +15,26 @@ readmissions_dbt/dbt_packages/
 # OS junk
 .DS_Store
 Thumbs.db
+# Secrets - NEVER commit credentials
+*.env
+.env
+profiles.yml
+*_secrets.yaml
+*.pem
+
+# Data files - NEVER commit raw data
+data/raw/
+data/processed/
+*.csv
+!requirements.txt
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Power BI temp files
+~$*.pbix

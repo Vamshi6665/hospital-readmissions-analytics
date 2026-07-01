@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs
+logs/
+
+# DBT target folders
+readmissions_dbt/target/
+readmissions_dbt/dbt_packages/
+
+# OS junk
+.DS_Store
+Thumbs.db

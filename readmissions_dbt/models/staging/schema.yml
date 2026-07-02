@@ -1,0 +1,129 @@
+version: 2
+
+models:
+
+  - name: stg_encounters
+    description: "Cleaned hospital encounter records with standardized column names, proper types, and binary target flags for readmission analysis."
+    columns:
+      - name: encounter_id
+        description: "Unique identifier for each hospital encounter."
+        tests:
+          - unique
+          - not_null
+
+      - name: patient_id
+        description: "Patient identifier (multiple encounters may share a patient_id)."
+        tests:
+          - not_null
+
+      - name: length_of_stay_days
+        description: "Number of days between admission and discharge."
+        tests:
+          - not_null
+
+      - name: readmitted_30d_flag
+        description: "Binary flag: 1 if patient readmitted within 30 days (HRRP KPI), 0 otherwise."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: readmitted_any_flag
+        description: "Binary flag: 1 if patient readmitted at any point (<30 or >30), 0 otherwise."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: gender
+        description: "Patient gender."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Male', 'Female', 'Unknown/Invalid']
+
+      - name: medication_changed_flag
+        description: "Binary flag: 1 if any medication was changed during the encounter."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: on_diabetes_medication_flag
+        description: "Binary flag: 1 if patient is on diabetes medication."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+  - name: stg_diagnoses
+    description: "Unpivoted diagnosis records - one row per (encounter, diagnosis_position). Enables easy joining to ICD-9 category lookups."
+    columns:
+      - name: encounter_id
+        description: "Encounter this diagnosis belongs to. Not unique (multiple diagnoses per encounter)."
+        tests:
+          - not_null
+
+      - name: diagnosis_position
+        description: "Position of the diagnosis: 1=primary, 2=secondary, 3=tertiary."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3]
+
+      - name: icd9_code
+        description: "ICD-9 diagnosis code (may include decimal point, e.g., '250.83')."
+        tests:
+          - not_null
+
+      - name: is_primary_diagnosis_flag
+        description: "Binary flag: 1 if this is the encounter's primary diagnosis."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+  - name: stg_medications
+    description: "Unpivoted medication records - one row per (encounter, medication). 23 diabetes-related drug columns from the raw source unpivoted into long format."
+    columns:
+      - name: encounter_id
+        description: "Encounter this medication observation belongs to."
+        tests:
+          - not_null
+
+      - name: medication_name
+        description: "Name of the medication being observed."
+        tests:
+          - not_null
+
+      - name: dose_status
+        description: "Status of the medication during encounter: No, Steady, Up, or Down."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['No', 'Steady', 'Up', 'Down']
+
+      - name: on_medication_flag
+        description: "Binary flag: 1 if the patient is on this medication (dose_status != 'No')."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: dose_changed_flag
+        description: "Binary flag: 1 if the dose was adjusted (Up or Down)."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: dose_direction
+        description: "Signed integer: +1 for Up, -1 for Down, 0 for No/Steady."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [-1, 0, 1]

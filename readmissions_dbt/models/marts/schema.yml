@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: fct_encounter
+    description: "Analytical fact table at grain of one hospital encounter. Joins cleaned encounter data with primary diagnosis category (Strack et al. 2014) and numeric age. Materialized as a table for BI performance. Consumed directly by Power BI dashboards and Python ML notebooks."
+    columns:
+      - name: encounter_id
+        description: "Unique encounter identifier."
+        tests:
+          - unique
+          - not_null
+
+      - name: patient_id
+        description: "Patient identifier (FK to dim_patient)."
+        tests:
+          - not_null
+
+      - name: primary_diagnosis_category
+        description: "Strack et al. 2014 clinical category of the primary diagnosis."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Circulatory', 'Respiratory', 'Digestive', 'Diabetes', 'Injury', 'Musculoskeletal', 'Genitourinary', 'Neoplasms', 'Other']
+
+      - name: age_group
+        description: "Broad age group: Young / Middle / Senior / Elderly."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Young', 'Middle', 'Senior', 'Elderly', 'Unknown']
+
+      - name: readmitted_30d_flag
+        description: "HRRP KPI: 1 if readmitted within 30 days, 0 otherwise."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: a1c_tested_flag
+        description: "1 if A1C was tested during encounter (CMS quality measure)."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: high_utilizer_flag
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: long_stay_flag
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: complex_case_flag
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]

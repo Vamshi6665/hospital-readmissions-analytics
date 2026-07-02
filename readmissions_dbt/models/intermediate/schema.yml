@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: int_icd9_grouped
+    description: "Maps individual ICD-9 codes into 9 broad clinical categories following Strack et al. 2014 methodology. Prepares data for category-level analytics and joins."
+    columns:
+      - name: encounter_id
+        description: "Encounter this diagnosis belongs to."
+        tests:
+          - not_null
+
+      - name: diagnosis_position
+        description: "1=primary, 2=secondary, 3=tertiary."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3]
+
+      - name: icd9_code
+        description: "Raw ICD-9 code preserved for reference."
+        tests:
+          - not_null
+
+      - name: diagnosis_category
+        description: "Clinical category from Strack et al. 2014."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Circulatory', 'Respiratory', 'Digestive', 'Diabetes', 'Injury', 'Musculoskeletal', 'Genitourinary', 'Neoplasms', 'Other']
+
+      - name: code_type
+        description: "N=numeric ICD-9, V=supplementary classification, E=external cause."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['N', 'V', 'E']

@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: kaggle_raw
+    description: "Raw data ingested from the UCI Diabetes 130-US Hospitals dataset (Kaggle)."
+    schema: raw
+    tables:
+      - name: diabetic_data
+        description: "101,766 inpatient encounters across 130 US hospitals (1999-2008). One row per hospital stay."
+        columns:
+          - name: encounter_id
+            description: "Unique identifier for each hospital encounter."
+            tests:
+              - unique
+              - not_null
+          - name: patient_nbr
+            description: "Patient identifier. Multiple encounters can belong to the same patient."
+            tests:
+              - not_null
+          - name: readmitted
+            description: "Readmission outcome: '<30' (readmitted within 30 days), '>30' (after 30 days), 'NO' (not readmitted)."
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['<30', '>30', 'NO']

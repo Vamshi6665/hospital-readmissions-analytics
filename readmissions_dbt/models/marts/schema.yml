@@ -1,6 +1,7 @@
 version: 2
 
 models:
+
   - name: fct_encounter
     description: "Analytical fact table at grain of one hospital encounter. Joins cleaned encounter data with primary diagnosis category (Strack et al. 2014) and numeric age. Materialized as a table for BI performance. Consumed directly by Power BI dashboards and Python ML notebooks."
     columns:
@@ -62,3 +63,69 @@ models:
           - accepted_values:
               arguments:
                 values: [0, 1]
+
+  - name: dim_patient
+    description: "Patient-level dimension aggregating encounter data to one row per unique patient. Includes lifetime volume, readmission rates, utilization averages, and quality measures."
+    columns:
+      - name: patient_id
+        description: "Unique patient identifier."
+        tests:
+          - unique
+          - not_null
+
+      - name: total_encounters
+        description: "Total number of hospital encounters for this patient in the dataset."
+        tests:
+          - not_null
+
+      - name: patient_encounter_segment
+        description: "Patient utilization tier: Single-encounter, Repeat (2-5), Frequent (6-10), or Very Frequent (10+)."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Single-encounter', 'Repeat (2-5)', 'Frequent (6-10)', 'Very Frequent (10+)']
+
+      - name: ever_high_utilizer_flag
+        description: "1 if the patient was ever flagged as a high utilizer across any encounter."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: ever_long_stay_flag
+        description: "1 if the patient ever had a long hospital stay (>7 days) in any encounter."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+      - name: ever_complex_case_flag
+        description: "1 if the patient ever had a complex case (8+ diagnoses) in any encounter."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+  - name: dim_diagnosis_category
+    description: "Reference dimension for the 9 Strack et al. 2014 diagnosis categories with clinical descriptions and encounter-level stats."
+    columns:
+      - name: category_name
+        description: "Strack clinical category name."
+        tests:
+          - unique
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Circulatory', 'Respiratory', 'Digestive', 'Diabetes', 'Injury', 'Musculoskeletal', 'Genitourinary', 'Neoplasms', 'Other']
+
+      - name: display_order
+        description: "Consistent Power BI sort order for the 9 categories."
+        tests:
+          - unique
+          - not_null
+
+      - name: total_encounters
+        description: "Total encounters where this was the primary diagnosis category."
+        tests:
+          - not_null
